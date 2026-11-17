@@ -1,0 +1,87 @@
+---
+layout: default
+title: "Webhook HMAC Signing"
+description: "How InfyniPay signs every webhook, the headers it sends, the algorithm to verify them, and how to rotate the secret without downtime."
+permalink: /webhooks/signing/
+---
+<section class="section" id="webhook-signing">
+                <h2 id="webhook-hmac-signing">Webhook HMAC Signing</h2>
+                <p>With signing enabled, every webhook carries an HMAC-SHA256 signature over the exact bytes we sent, plus the time we sent them. Verifying it proves both <strong>authenticity</strong> (it came from InfyniPay) and <strong>integrity</strong> (nothing was modified in transit), and the timestamp lets you reject replays.</p>
+
+                <h3 id="1-enable-signing-and-get-your-secret">1. Enable signing and get your secret</h3>
+                <p>In the Console: <strong>Settings → Webhook → Enable webhook signing</strong>. Or call the App API:</p>
+                <div class="code-block">
+                    <div class="code-language">cURL</div>
+                    <pre>curl -X POST https://appapi.infynipay.com/api/apps/YOUR_APP_ID/webhook-signing-secret \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# 200 OK
+# { "signingSecret": "whsec_9Xy2...redacted..." }</pre>
+                </div>
+                <p>The secret looks like <code>whsec_</code> followed by 32 random bytes in base64url. It is returned <strong>once</strong> — store it in your secret manager or environment immediately; it is never shown again. Calling the endpoint again <em>rotates</em> the secret and invalidates the old one. <code>DELETE</code> on the same path turns signing off, after which webhooks are sent unsigned.</p>
+
+                <div class="callout callout-danger">
+                    {% include icon.html name="key" %}
+                    <p>The signing secret is a credential, not a setting. Keep it out of source control, out of client-side code and out of logs. Rotate it if it is ever exposed — and see <a href="/webhooks/signing/#rotation">rotating without downtime</a>.</p>
+                </div>
+
+                <h3 id="2-the-headers-we-send">2. The headers we send</h3>
+                <div class="table-scroll">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Header</th>
+                            <th>Example</th>
+                            <th>Meaning</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>X-InfyniPay-Signature</code></td>
+                            <td><code>t=1785000000,v1=6f1a…c3</code></td>
+                            <td>Signing timestamp and the version-1 signature, comma separated.</td>
+                        </tr>
+                        <tr>
+                            <td><code>X-InfyniPay-Timestamp</code></td>
+                            <td><code>1785000000</code></td>
+                            <td>The same timestamp on its own, for convenience.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>The <code>t</code> value is Unix time in <strong>seconds</strong>, UTC. The <code>v1</code> value is lowercase hex, 64 characters. New signature versions would arrive as additional <code>vN=</code> pairs in the same header, so parse by key rather than by position.</p>
+
+                <h3 id="3-the-algorithm">3. The algorithm</h3>
+                <div class="code-block">
+                    <div class="code-language">Scheme</div>
+                    <pre>signed_value = "{t}" + "." + raw_request_body      # a literal dot between them
+signature    = hex_lowercase( HMAC_SHA256( signed_value, signing_secret ) )
+header       = "t={t},v1={signature}"</pre>
+                </div>
+
+                <p>To verify a request:</p>
+                <ol style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Read the <strong>raw body</strong> as bytes, before any JSON parsing.</li>
+                    <li>Parse <code>t</code> and <code>v1</code> from the signature header.</li>
+                    <li>Reject the request if <code>t</code> is further from your clock than your tolerance — five minutes is a good default.</li>
+                    <li>Recompute the HMAC over <code>t + "." + raw_body</code> with your secret.</li>
+                    <li>Compare with <code>v1</code> in <strong>constant time</strong>.</li>
+                    <li>Only then parse the JSON and act on it.</li>
+                </ol>
+
+                <div class="callout callout-warning">
+                    {% include icon.html name="triangle-exclamation" %}
+                    <p><strong>The single most common cause of failed verification is a re-serialized body.</strong> If your framework parses JSON and you re-encode it, key order and whitespace change and the signature will never match. Capture the raw bytes first — every sample below shows how.</p>
+                </div>
+
+                <h3 id="worked-example">Worked example</h3>
+                <p>Use these values to check your implementation offline. With secret <code>whsec_test_secret</code>, timestamp <code>1720000000</code> and body:</p>
+                <div class="code-block">
+                    <div class="code-language">Body</div>
+                    <pre>{"payment":{"paymentId":42,"paymentState":"Captured"}}</pre>
+                </div>
+                <p>the signed value is <code>1720000000.{"payment":{"paymentId":42,"paymentState":"Captured"}}</code> and your HMAC-SHA256, hex-encoded lowercase, must equal the <code>v1</code> value we send. Any implementation that agrees on this string agrees on every webhook.</p>
+            </section>
+
+            <!-- Samples -->
+            

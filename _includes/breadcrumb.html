@@ -1,0 +1,38 @@
+{%- comment -%}
+  BreadcrumbList JSON-LD, derived from page.url.
+
+  Labels come from _data/nav.yml so the trail always reads the same as the
+  sidebar; a URL that is not in nav.yml falls back to a capitalised slug, which
+  is the visible signal that the page was added without being navigable.
+
+  Emits nothing on the home page, where there is no trail worth describing.
+  Mirrors the equivalent include in infynipay-product-www.
+{%- endcomment -%}
+{%- assign segs = page.url | split: "/" | where_exp: "s", "s != ''" -%}
+{%- if segs.size > 0 -%}
+{%- capture items -%}
+{%- assign path = "" -%}
+{%- for seg in segs -%}
+{%- assign path = path | append: "/" | append: seg -%}
+{%- assign url = path | append: "/" -%}
+{%- assign label = "" -%}
+{%- for group in site.data.nav -%}
+{%- for item in group.items -%}
+{%- if item.url == url -%}{%- assign label = item.text -%}{%- endif -%}
+{%- endfor -%}
+{%- endfor -%}
+{%- if label == "" -%}{%- assign label = seg | replace: "-", " " | capitalize -%}{%- endif -%}
+,
+    { "@type": "ListItem", "position": {{ forloop.index | plus: 1 }}, "name": {{ label | jsonify }}, "item": "{{ url | absolute_url }}" }
+{%- endfor -%}
+{%- endcapture -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Documentation", "item": "{{ '/' | absolute_url }}" }{{ items }}
+  ]
+}
+</script>
+{%- endif -%}

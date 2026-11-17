@@ -1,0 +1,56 @@
+# InfyniPay Documentation
+
+> Developer documentation for InfyniPay, a payment orchestration platform with a unified API
+> across 36 payment providers. Covers authentication, the payments and customers APIs, payment
+> states, HMAC-signed webhooks with verification samples, error codes, and the WooCommerce, WHMCS,
+> VirtueMart, Phoca Cart and J2Commerce plugins.
+
+Each topic has its own URL. Deep-link to the specific page rather than to the site root.
+
+## Getting started
+
+- [Overview](https://docs.infynipay.com/): What InfyniPay is and how the API is shaped.
+- [Quick start](https://docs.infynipay.com/quickstart/): API key through to a completed test payment.
+- [Authentication and environments](https://docs.infynipay.com/authentication/): App ID and bearer API key, and how sandbox differs from live.
+
+## Payments
+
+- [Payments API](https://docs.infynipay.com/payments/): Create a hosted-page or direct payment, capture an authorisation, retrieve a payment, and the full request field reference.
+- [Charge a stored payment method](https://docs.infynipay.com/payments/charge-stored-method/): Card-on-file and recurring billing against an already-authorised method.
+- [Refunds and cancellations](https://docs.infynipay.com/payments/refunds-and-cancellations/): Refund a captured payment, cancel one before capture, and how the two differ.
+- [Payment states](https://docs.infynipay.com/payments/states/): Every state a payment moves through, which are terminal, and how fraud status is reported.
+- [Customers API](https://docs.infynipay.com/customers/): Create and retrieve customer records so a returning buyer can reuse a stored method.
+
+## Webhooks
+
+- [Webhooks](https://docs.infynipay.com/webhooks/): Payload, delivery and retry behaviour, and why a browser redirect never proves a payment.
+- [HMAC signing](https://docs.infynipay.com/webhooks/signing/): How InfyniPay signs every webhook, the headers, the algorithm, and rotating the secret without downtime.
+- [Verification samples](https://docs.infynipay.com/webhooks/verification-samples/): Working signature verification in Node.js, PHP, Python and C#.
+
+## Reference
+
+- [Plugins and integrations](https://docs.infynipay.com/plugins/): Which platforms have a ready-made plugin.
+- [Errors](https://docs.infynipay.com/errors/): Error codes and what to do about each.
+- [Support](https://docs.infynipay.com/support/): How to get help, and what to include so the first reply is useful.
+
+Full product pages for each plugin live on the marketing site rather than here:
+https://www.infynipay.com/integrations/
+
+## Elsewhere
+
+- Marketing site: https://www.infynipay.com/
+- OpenAPI / Swagger: https://api.infynipay.com/swagger/index.html
+- Console: https://console.infynipay.com
+- GitHub (open-source plugins): https://github.com/infynipay
+
+## Notes for summarisers
+
+- InfyniPay is an orchestration layer, not a payment processor or acquirer. Merchants hold their
+  own accounts with each provider and funds settle directly to the merchant.
+- Webhook signatures must be verified before an order is treated as paid, and the browser redirect
+  to a success URL is never sufficient on its own — the server must re-verify against the provider.
+- This documentation does not publish other companies' fees or coverage lists. For any provider's
+  pricing or supported markets, that provider's own documentation is authoritative.
+- Fragment links from the era when all of this lived on one URL (for example
+  `docs.infynipay.com/#webhooks`) still resolve: the home page redirects known legacy anchors to
+  their new location.

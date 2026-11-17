@@ -1,0 +1,89 @@
+---
+layout: default
+title: "Authentication and Environments"
+description: "How InfyniPay authenticates requests with an App ID and bearer API key, and how the sandbox and live environments differ."
+permalink: /authentication/
+---
+<section class="section" id="authentication">
+                <h2 id="authentication-2">Authentication</h2>
+                <p>Every request carries the API key issued for your app, sent as a bearer credential:</p>
+
+                <div class="code-block">
+                    <div class="code-language">HTTP</div>
+                    <pre>Authorization: Bearer YOUR_API_KEY</pre>
+                </div>
+
+                <p>API keys are scoped to a single app, and the app is identified separately in the path (<code>/api/apps/{appId}/…</code>). A key for your sandbox app cannot touch live data, and vice versa.</p>
+
+                <h3 id="rules">Rules</h3>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li><strong>Server-side only.</strong> The key authorises payment operations — never ship it to a browser, a mobile app or a public repository.</li>
+                    <li><strong>Rotate on exposure.</strong> Create a replacement key in the Console and delete the old one; it stops working immediately.</li>
+                    <li><strong>One key per integration.</strong> Separate keys make it possible to revoke a single store or service without taking the rest down.</li>
+                    <li><strong>Team access is role-based.</strong> Console users have roles and permissions; API keys act with the permissions granted to them.</li>
+                </ul>
+
+                <div class="callout">
+                    {% include icon.html name="circle-info" %}
+                    <p>Missing or invalid credentials return <code>401 Unauthorized</code>; a valid key without permission for that app returns <code>403 Forbidden</code>.</p>
+                </div>
+            </section>
+
+            <!-- Environments Section -->
+            
+
+<section class="section" id="environments">
+                <h2 id="environments-2">Environments</h2>
+                <p>Sandbox and live are fully isolated: separate apps, separate credentials, separate provider configuration, and no crossover of data between them.</p>
+
+                <h3 id="base-urls">Base URLs</h3>
+                <div class="table-scroll">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Base URL</th>
+                            <th>What it is for</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Payment API</td>
+                            <td><code>https://api.infynipay.com</code></td>
+                            <td>Payments and customers — everything in this reference</td>
+                        </tr>
+                        <tr>
+                            <td>App API</td>
+                            <td><code>https://appapi.infynipay.com</code></td>
+                            <td>App settings, webhook signing secret, provider profiles, fraud policies</td>
+                        </tr>
+                        <tr>
+                            <td>Console</td>
+                            <td><code>https://console.infynipay.com</code></td>
+                            <td>The dashboard: credentials, providers, payments, webhook logs</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>Both APIs publish an OpenAPI document and a browsable UI at <code>/swagger/index.html</code> — for example <a href="https://api.infynipay.com/swagger/index.html" target="_blank" rel="noopener">api.infynipay.com/swagger<span class="sr-only"> (opens in new tab)</span></a>. The spec is the authoritative contract; this page documents the endpoints you need day to day.</p>
+
+                <h3 id="sandbox-behaviour">Sandbox behaviour</h3>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Use your provider's own test credentials and test cards — no live money moves.</li>
+                    <li>Undelivered sandbox webhooks are abandoned after <strong>one hour</strong>; live webhooks keep retrying.</li>
+                    <li>A sandbox webhook URL must still be reachable from the internet. On a local machine use a tunnel such as Cloudflare Tunnel or ngrok — <code>localhost</code> can never receive a webhook.</li>
+                </ul>
+
+                <h3 id="supported-currencies">Supported currencies</h3>
+                <p>A payment is created in one of these currencies; which ones you can actually charge depends on the provider profiles configured for your app.</p>
+                <ul class="chip-row">
+                    <li>USD</li><li>EUR</li><li>GBP</li><li>AED</li><li>SAR</li><li>QAR</li>
+                    <li>AUD</li><li>CAD</li><li>NZD</li><li>CHF</li><li>SEK</li><li>NOK</li>
+                    <li>DKK</li><li>CZK</li><li>HUF</li><li>PLN</li><li>RON</li><li>MXN</li>
+                    <li>INR</li><li>BDT</li><li>MYR</li><li>SGD</li><li>THB</li>
+                    <li>NGN</li><li>GHS</li><li>KES</li><li>ZAR</li>
+                </ul>
+            </section>
+
+            <!-- Payments API Section -->
+            

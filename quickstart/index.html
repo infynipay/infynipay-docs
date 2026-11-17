@@ -1,0 +1,83 @@
+---
+layout: default
+title: "Quick Start"
+description: "Go from an API key to a completed test payment. Create a payment, redirect the customer to checkout, and confirm the result server-side."
+permalink: /quickstart/
+---
+<section class="section" id="quickstart">
+                <h2 id="quick-start-guide">Quick Start Guide</h2>
+                <p>Take a sandbox payment end to end in about five minutes.</p>
+
+                <h3 id="1-get-your-app-id-and-api-key">1. Get your App ID and API key</h3>
+                <p>Create an account in the <a href="https://console.infynipay.com" target="_blank" rel="noopener">InfyniPay Console<span class="sr-only"> (opens in new tab)</span></a>, add a payment provider profile, and copy the credentials for the app you want to use:</p>
+                <ul class="kv-list">
+                    <li><span class="kv-key">App ID</span><span>Identifies your app; it is part of every API path.</span></li>
+                    <li><span class="kv-key">API key</span><span>Sent as a bearer credential in the <code>Authorization</code> header.</span></li>
+                </ul>
+                <p>Sandbox and live are <strong>separate apps</strong> with separate IDs, API keys and provider configuration — see <a href="/authentication/#environments">Environments</a>.</p>
+
+                <h3 id="2-create-a-payment">2. Create a payment</h3>
+                <p>Post your order to the hosted-page endpoint. <code>referenceId</code> is your own order number, and it doubles as the idempotency key — it must be unique within your app.</p>
+                <div class="code-block">
+                    <div class="code-language">cURL</div>
+                    <pre>curl -X POST https://api.infynipay.com/api/apps/YOUR_APP_ID/payments/hosted-page \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "referenceId": "order-1001",
+    "amount": 20.00,
+    "currency": "USD",
+    "returnUrl": "https://your-store.example/checkout/return?order=1001",
+    "autoCapture": true,
+    "showPayRecurringInCheckout": false,
+    "customerOrder": {
+      "customer": {
+        "customerId": "cus-42"
+      }
+    },
+    "webhookUrl": "https://your-store.example/infynipay/webhook"
+  }'</pre>
+                </div>
+                <p>Those are the required fields plus <code>webhookUrl</code>. Buyer contact detail, a basket breakdown, provider restrictions and stored-method registration are all optional — see <a href="/payments/">Payments API</a>.</p>
+
+                <h3 id="3-send-the-customer-to-the-checkout-page">3. Send the customer to the checkout page</h3>
+                <p>A successful call returns <code>201 Created</code> with the payment and its <code>redirectUrl</code>. Redirect the browser there; InfyniPay renders the checkout, the customer picks a provider, and we return them to your <code>returnUrl</code>.</p>
+                <div class="code-block">
+                    <div class="code-language">JSON</div>
+                    <pre>{
+  "appId": "YOUR_APP_ID",
+  "paymentId": 90210,
+  "paymentState": "Created",
+  "paymentStateId": 1,
+  "amount": 20.00,
+  "capturedAmount": 0,
+  "referenceId": "order-1001",
+  "currency": "USD",
+  "autoCapture": true,
+  "paymentFlow": "HostedPage",
+  "autoPayment": "None",
+  "fraudStatus": "Unknown",
+  "redirectUrl": "https://checkout.infynipay.com/...",
+  "returnUrl": "https://your-store.example/checkout/return?order=1001",
+  "webhookUrl": "https://your-store.example/infynipay/webhook",
+  "createdTime": "2026-08-03T09:15:00Z"
+}</pre>
+                </div>
+
+                <div class="callout callout-warning">
+                    {% include icon.html name="triangle-exclamation" %}
+                    <p><strong>Never treat the return URL as proof of payment.</strong> The customer's browser can be closed, refreshed or replayed. The webhook — and the API read that follows it — is the only authoritative signal.</p>
+                </div>
+
+                <h3 id="4-confirm-the-payment">4. Confirm the payment</h3>
+                <p>When we notify you, read the payment back by your own order number and act on the state you get from the API:</p>
+                <div class="code-block">
+                    <div class="code-language">cURL</div>
+                    <pre>curl https://api.infynipay.com/api/apps/YOUR_APP_ID/payments/referenceId:order-1001 \
+  -H "Authorization: Bearer YOUR_API_KEY"</pre>
+                </div>
+                <p>A <code>Captured</code> state means the money is settled with the provider and the order can be fulfilled. The full list is in <a href="/payments/states/">Payment States</a>.</p>
+            </section>
+
+            <!-- Authentication Section -->
+            

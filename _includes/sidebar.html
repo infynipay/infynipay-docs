@@ -1,0 +1,26 @@
+{%- comment -%}
+  Sidebar navigation, rendered from _data/nav.yml.
+
+  This used to be same-page anchor links with a scroll-spy deciding which was
+  active. After the split they are real URLs across fourteen pages, so "active"
+  now means "this is the page you are on" and is resolved at build time from
+  page.url — no JavaScript involved, which also means it is correct before the
+  first paint instead of after.
+
+  aria-current="page" is what actually tells a screen reader where it is; the
+  .active class is only the visual half.
+{%- endcomment -%}
+<aside class="sidebar" id="docs-sidebar">
+    {%- for group in site.data.nav %}
+    <div class="sidebar-section">
+        <div class="sidebar-heading" id="sidebar-group-{{ forloop.index }}">{{ group.title }}</div>
+        <ul class="sidebar-nav" aria-labelledby="sidebar-group-{{ forloop.index }}">
+            {%- for item in group.items %}
+            {%- assign is_current = false -%}
+            {%- if page.url == item.url %}{% assign is_current = true %}{% endif -%}
+            <li><a href="{{ item.url | relative_url }}"{% if is_current %} class="active" aria-current="page"{% endif %}>{{ item.text }}</a></li>
+            {%- endfor %}
+        </ul>
+    </div>
+    {%- endfor %}
+</aside>

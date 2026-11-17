@@ -1,0 +1,164 @@
+/* Header and Navigation */
+.header {
+    background: var(--background-primary);
+    border-bottom: 1px solid var(--border-color);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    height: var(--header-height);
+}
+
+/* The header spans the full viewport rather than the centred 1200px container,
+   so the logo sits in the top-left corner, flush with the sidebar below it
+   instead of floating in from the edge on wide screens. */
+.header .container {
+    max-width: none;
+    padding: 0 var(--spacing-md);
+    /* .nav centres itself with height:100%, which only resolves if every box
+       between it and the fixed-height header carries a height too. */
+    height: 100%;
+}
+
+/* Fill the header and centre on the cross axis rather than padding a fixed
+   amount: the logo is 58px tall, so a hard 1rem top+bottom padding made the nav
+   90px inside an 86px header and pushed the logo off centre. */
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    gap: var(--spacing-md);
+}
+
+/* Brand logo — two files, one per theme. The white logo is only legible on the
+   navy surface and the navy one only on white, so the active theme decides
+   which is shown (js/docs.js sets data-theme on <html>). */
+.logo-link {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.logo-img {
+    display: block;
+    height: 58px;
+    width: auto;
+}
+
+.logo-img.logo-on-light { display: block; }
+.logo-img.logo-on-dark { display: none; }
+
+:root[data-theme="dark"] .logo-img.logo-on-light { display: none; }
+:root[data-theme="dark"] .logo-img.logo-on-dark { display: block; }
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .logo-img.logo-on-light { display: none; }
+    :root:not([data-theme="light"]) .logo-img.logo-on-dark { display: block; }
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: var(--spacing-xl);
+    margin: 0;
+    align-items: center;
+}
+
+.nav-links a {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.nav-links a:hover {
+    color: var(--primary-color);
+}
+
+/* Link out to the console — a signposted link rather than a filled button, so
+   the header carries no call-to-action styling the console itself does not use. */
+.nav-links .nav-console {
+    color: var(--primary-color);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.nav-links .nav-console i {
+    font-size: 0.75rem;
+    transition: transform var(--transition-fast);
+}
+
+.nav-links .nav-console:hover i,
+.nav-links .nav-console:focus-visible i {
+    transform: translateX(3px);
+}
+
+/* Light / dark switch */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    background: var(--background-secondary);
+    color: var(--primary-color);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: var(--text-light);
+}
+
+/* One icon per theme — the button shows the mode it switches TO. */
+.theme-toggle .icon-dark { display: inline-block; }
+.theme-toggle .icon-light { display: none; }
+
+:root[data-theme="dark"] .theme-toggle .icon-dark { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-light { display: inline-block; }
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-toggle .icon-dark { display: none; }
+    :root:not([data-theme="light"]) .theme-toggle .icon-light { display: inline-block; }
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+/* Mobile sidebar trigger — hidden here, revealed by the responsive layer. */
+.sidebar-toggle {
+    display: none;
+    align-items: center;
+    gap: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    background: var(--background-secondary);
+    color: var(--text-primary);
+    font-family: var(--font-family-primary);
+    font-size: 0.8rem;
+    padding: 0.45rem 0.7rem;
+    cursor: pointer;
+}
+
+/* Inline SVG icons replaced the Font Awesome webfont; give them a sensible
+   intrinsic size wherever they appear, since an <svg> has no font-size to
+   inherit the way an icon-font <i> did. */
+.icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    flex-shrink: 0;
+}
+.theme-toggle .icon { width: 1.1em; height: 1.1em; }

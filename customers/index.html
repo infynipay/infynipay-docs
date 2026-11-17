@@ -1,0 +1,154 @@
+---
+layout: default
+title: "Customers API"
+description: "Create and retrieve customer records so a returning buyer can reuse a stored payment method."
+permalink: /customers/
+---
+<section class="section" id="customers">
+                <h2 id="customers-api">Customers API</h2>
+                <p>Customers are keyed by <strong>your</strong> identifier. Create one before charging, or let the first payment create it implicitly through <code>customerOrder.customer</code>.</p>
+
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="http-method method-post">POST</span>
+                        <span class="api-endpoint">/api/apps/<span class="api-param">{appId}</span>/customers</span>
+                        <span class="api-note">201 Created</span>
+                    </div>
+                    <div class="api-body">
+                        <h3 id="create-a-customer">Create a customer</h3>
+                        <div class="table-scroll">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Required</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>customerId</code></td>
+                                    <td>string</td>
+                                    <td>Yes</td>
+                                    <td>Your identifier for the customer. Must be unique within the app.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>firstName</code>, <code>lastName</code></td>
+                                    <td>string</td>
+                                    <td>No</td>
+                                    <td>Buyer name.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>email</code></td>
+                                    <td>string</td>
+                                    <td>No</td>
+                                    <td>Used for receipts and provider-side risk checks.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>mobileNumber</code></td>
+                                    <td>string</td>
+                                    <td>No</td>
+                                    <td>Contact number.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>fraudPolicyId</code></td>
+                                    <td>integer</td>
+                                    <td>No</td>
+                                    <td>Pin this customer to a specific fraud policy.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-language">cURL</div>
+                            <pre>curl -X POST https://api.infynipay.com/api/apps/YOUR_APP_ID/customers \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customerId": "cus-42",
+    "firstName": "Ada",
+    "lastName": "Lovelace",
+    "email": "ada@example.com",
+    "mobileNumber": "+441234567890"
+  }'</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="http-method method-get">GET</span>
+                        <span class="api-endpoint">/api/apps/<span class="api-param">{appId}</span>/customers/<span class="api-param">{customerId}</span></span>
+                        <span class="api-note">200 OK</span>
+                    </div>
+                    <div class="api-body">
+                        <h3 id="retrieve-a-customer">Retrieve a customer</h3>
+                        <div class="code-block">
+                            <div class="code-language">JSON</div>
+                            <pre>{
+  "customerId": "cus-42",
+  "firstName": "Ada",
+  "lastName": "Lovelace",
+  "email": "ada@example.com",
+  "mobileNumber": "+441234567890",
+  "app": {
+    "appId": "YOUR_APP_ID",
+    "friendlyName": "Acme Store",
+    "isSandbox": true,
+    "isBlocked": false,
+    "createdTime": "2026-01-04T10:00:00Z"
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 id="related-customer-endpoints">Related customer endpoints</h3>
+                <div class="table-scroll">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Path</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/customers</code></td>
+                            <td>List customers for the app.</td>
+                        </tr>
+                        <tr>
+                            <td><code>PATCH</code></td>
+                            <td><code>/customers/{customerId}</code></td>
+                            <td>Update name, email or phone.</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/customers/{customerId}/payment-methods</code></td>
+                            <td>List stored payment methods available for auto payments.</td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE</code></td>
+                            <td><code>/customers/{customerId}/payment-methods/{paymentMethodId}</code></td>
+                            <td>Remove a stored method.</td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE</code></td>
+                            <td><code>/customers/{customerId}/auto-payments/{customerAutomaticProfileId}</code></td>
+                            <td>Stop an auto-payment registration — use this when a subscription is cancelled.</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/customers/{customerId}/panel-link</code></td>
+                            <td>Generate a signed link to the customer's own panel, where they manage their payment methods.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </section>
+
+            <!-- Webhooks -->
+            

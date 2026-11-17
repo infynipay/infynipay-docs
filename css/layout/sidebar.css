@@ -1,0 +1,68 @@
+/* Sidebar Navigation */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--background-secondary);
+    padding: var(--spacing-lg) var(--spacing-md);
+    border-right: 1px solid var(--border-color);
+    position: fixed;
+    height: calc(100vh - var(--header-height));
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.sidebar-nav {
+    list-style: none;
+}
+
+.sidebar-nav li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.sidebar-nav a {
+    display: block;
+    padding: var(--spacing-sm) 0.75rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-fast);
+    font-size: 0.9rem;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.sidebar-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Was `h3`. These label the nav lists rather than opening a document section,
+   so they are no longer headings — otherwise the outline started at h3, before
+   the page's own h1. Same rule, same appearance. */
+.sidebar-section .sidebar-heading {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+/* On-this-page contents, appended by js/docs.js on pages long enough to need
+   it. The main sidebar is now cross-page navigation, so this is the only thing
+   left that tracks scroll position — and only within the current page. */
+.on-this-page {
+    border-top: 1px solid var(--border-color, rgba(127, 127, 127, .25));
+    padding-top: var(--spacing-md);
+}
+
+.on-this-page .sidebar-nav a {
+    font-size: 0.85em;
+    opacity: 0.85;
+}
+
+.on-this-page .sidebar-nav a.active {
+    opacity: 1;
+    font-weight: 600;
+}

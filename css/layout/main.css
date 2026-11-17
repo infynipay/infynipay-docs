@@ -1,0 +1,39 @@
+/* Main Layout Structure */
+.main-layout {
+    display: flex;
+    margin-top: var(--header-height);
+    min-height: calc(100vh - var(--header-height));
+}
+
+/* Content Area */
+.content {
+    margin-left: var(--sidebar-width);
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    width: calc(100% - var(--sidebar-width));
+    max-width: none;
+}
+
+.section {
+    margin-bottom: var(--spacing-2xl);
+}
+/* Inline links in prose need a non-colour cue. The link colour (--blue-200) is
+   8.74:1 against the page background and therefore readable, but only 1.36:1
+   against the surrounding body text — so colour alone does not tell a reader
+   that it IS a link (WCAG 1.4.1). Underline them where they sit inside a
+   sentence; sidebar, header, cards and buttons are not text blocks and are
+   deliberately excluded. */
+.content p > a,
+.content li > a,
+.content td > a,
+.callout a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* Every h2/h3 now carries an id so it can be linked and listed in the
+   on-this-page contents. Without a scroll margin an anchored jump puts the
+   heading underneath the fixed header. */
+.content h2[id],
+.content h3[id] {
+    scroll-margin-top: 90px;
+}

@@ -1,0 +1,70 @@
+/* Dark theme
+ *
+ * The docs default to the light brand UI (same as www.infynipay.com) and
+ * switch to this navy theme when the reader picks dark in the header toggle,
+ * or when their OS asks for dark and they have not chosen explicitly.
+ *
+ * js/docs.js writes data-theme="light|dark" on <html>. The attribute always
+ * wins over the media query, so an explicit choice is never overridden.
+ * Only the palette hooks are redefined here — no component is restyled.
+ */
+:root[data-theme="dark"] {
+    --background-primary: #0b1027;
+    --background-secondary: #121a3a;
+    --background-dark: #070b1c;
+
+    --text-primary: #f2f6ff;
+    --text-secondary: #a9b8d8;
+
+    --border-color: #23305c;
+    --code-bg: #182142;
+    --code-block-bg: #070b1c;
+
+    --primary-color: var(--blue-100);
+    --primary-dark: #7cc6ff;
+    --secondary-color: var(--blue-50);
+
+    --success: #34d399;
+    --warning: #fbbf24;
+    --error: #f87171;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.55);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --background-primary: #0b1027;
+        --background-secondary: #121a3a;
+        --background-dark: #070b1c;
+
+        --text-primary: #f2f6ff;
+        --text-secondary: #a9b8d8;
+
+        --border-color: #23305c;
+        --code-bg: #182142;
+        --code-block-bg: #070b1c;
+
+        --primary-color: var(--blue-100);
+        --primary-dark: #7cc6ff;
+        --secondary-color: var(--blue-50);
+
+        --success: #34d399;
+        --warning: #fbbf24;
+        --error: #f87171;
+
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+        --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.55);
+    }
+}
+
+/* Inline code needs a lighter blue to stay readable on the navy surface. */
+:root[data-theme="dark"] code {
+    color: var(--blue-50);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) code {
+        color: var(--blue-50);
+    }
+}

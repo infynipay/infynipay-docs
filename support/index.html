@@ -1,0 +1,42 @@
+---
+layout: default
+title: "Support"
+description: "How to get help with a InfyniPay integration, and what to include so the first reply is useful."
+permalink: /support/
+---
+                <h2 id="support">Support</h2>
+                <p>Support is free on every plan, including the free one.</p>
+
+                <div class="quick-start-grid">
+                    <div class="quick-start-card">
+                        <div class="quick-start-icon">{% include icon.html name="envelope" %}</div>
+                        <h3 id="email">Email</h3>
+                        <p><a href="mailto:support@infynipay.com">support@infynipay.com</a> — include your App ID and the <code>paymentId</code> or <code>referenceId</code>.</p>
+                    </div>
+                    <div class="quick-start-card">
+                        <div class="quick-start-icon">{% include icon.html name="gauge-high" %}</div>
+                        <h3 id="console">Console</h3>
+                        <p>Payments, webhook delivery logs and provider settings live in the <a href="https://console.infynipay.com" target="_blank" rel="noopener">Console<span class="sr-only"> (opens in new tab)</span></a>.</p>
+                    </div>
+                    <div class="quick-start-card">
+                        <div class="quick-start-icon">{% include icon.html name="github" %}</div>
+                        <h3 id="plugin-issues">Plugin issues</h3>
+                        <p>Report plugin bugs on <a href="https://github.com/infynipay" target="_blank" rel="noopener">GitHub<span class="sr-only"> (opens in new tab)</span></a>, where all our plugins are developed.</p>
+                    </div>
+                </div>
+
+                <h3 id="before-you-write-in">Before you write in</h3>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Check the payment in the Console — its state, fraud status and <code>lastError</code> usually explain the problem.</li>
+                    <li>For webhook trouble, open the delivery log: it records every attempt with the status code your endpoint returned.</li>
+                    <li>Reproduce in sandbox where you can. It is the same code path, without the money.</li>
+                </ul>
+
+                <h3 id="more-from-infynipay">More from InfyniPay</h3>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li><a href="https://www.infynipay.com/trust-center/" target="_blank" rel="noopener">Trust Center<span class="sr-only"> (opens in new tab)</span></a> — encryption, key handling, MFA and incident response.</li>
+                    <li><a href="https://www.infynipay.com/pricing.html" target="_blank" rel="noopener">Pricing<span class="sr-only"> (opens in new tab)</span></a> — free forever, with white-labeling on Premium.</li>
+                    <li><a href="https://www.infynipay.com/providers.html" target="_blank" rel="noopener">Providers<span class="sr-only"> (opens in new tab)</span></a> — every gateway we support.</li>
+                    <li><a href="https://www.infynipay.com/contact-us.html" target="_blank" rel="noopener">Contact<span class="sr-only"> (opens in new tab)</span></a> — sales and partnership enquiries.</li>
+                </ul>
+            

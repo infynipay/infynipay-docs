@@ -1,0 +1,36 @@
+# Sidebar navigation for docs.infynipay.com.
+#
+# Single source of truth. Before the split the sidebar was hand-written markup
+# repeated nowhere (there was one page), but with fourteen pages the same list
+# would otherwise have to be edited fourteen times — which is precisely why the
+# layout was extracted first.
+#
+# `url` must match a page's `permalink`; _includes/sidebar.html marks the
+# current one active by comparing against page.url, so a typo shows up as a
+# permanently inactive link rather than a build error. Check both together.
+
+- title: Getting Started
+  items:
+    - { text: Overview,         url: / }
+    - { text: Quick Start,      url: /quickstart/ }
+    - { text: Authentication,   url: /authentication/ }
+
+- title: Payments
+  items:
+    - { text: Payments API,     url: /payments/ }
+    - { text: Stored Methods,   url: /payments/charge-stored-method/ }
+    - { text: Refunds,          url: /payments/refunds-and-cancellations/ }
+    - { text: Payment States,   url: /payments/states/ }
+    - { text: Customers,        url: /customers/ }
+
+- title: Webhooks
+  items:
+    - { text: Payload & Delivery,     url: /webhooks/ }
+    - { text: HMAC Signing,           url: /webhooks/signing/ }
+    - { text: Verification Samples,   url: /webhooks/verification-samples/ }
+
+- title: Resources
+  items:
+    - { text: Plugins,          url: /plugins/ }
+    - { text: Errors,           url: /errors/ }
+    - { text: Support,          url: /support/ }

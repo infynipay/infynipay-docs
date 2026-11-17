@@ -1,0 +1,44 @@
+---
+layout: default
+title: "Webhooks"
+description: "The webhook payload, delivery and retry behaviour, and why the browser redirect is never sufficient to mark an order paid."
+permalink: /webhooks/
+---
+<section class="section" id="webhooks">
+                <h2 id="webhooks-2">Webhooks</h2>
+                <p>InfyniPay posts a webhook to your endpoint whenever a payment changes state. Set the URL per payment with <code>webhookUrl</code>, or once for the whole app in the Console.</p>
+
+                <h3 id="payload">Payload</h3>
+                <p>The body is small on purpose — it identifies the payment and its new state, and nothing else. Read the payment back from the API for the authoritative detail.</p>
+                <div class="code-block">
+                    <div class="code-language">JSON</div>
+                    <pre>{
+  "payment": {
+    "paymentId": 90210,
+    "paymentState": "Captured",
+    "paymentStateId": 7,
+    "referenceId": "order-1001"
+  }
+}</pre>
+                </div>
+
+                <h3 id="delivery-and-retries">Delivery and retries</h3>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Delivery is <code>POST</code> with <code>Content-Type: application/json</code>.</li>
+                    <li>Any <strong>2xx</strong> response counts as accepted. Anything else — or a timeout — is a failure and the event is retried.</li>
+                    <li>Failed events are queued and retried automatically; every attempt is recorded with its status code and error, and is visible in the Console.</li>
+                    <li>Sandbox events stop retrying after <strong>one hour</strong>. Live events keep retrying.</li>
+                    <li>Retries and out-of-order delivery are normal. Make your handler <strong>idempotent</strong> and never move an order backwards.</li>
+                </ul>
+
+                <h3 id="authorization-header">Authorization header</h3>
+                <p>Independently of signing, you can have InfyniPay send a fixed credential with every webhook. Configure the scheme and parameter in the Console (for example scheme <code>Bearer</code> and a long random token) and we send:</p>
+                <div class="code-block">
+                    <div class="code-language">HTTP</div>
+                    <pre>Authorization: Bearer YOUR_WEBHOOK_TOKEN</pre>
+                </div>
+                <p>Compare it in constant time, exactly as our own plugins do. This proves the caller knows a shared secret; HMAC signing below additionally proves the <em>body</em> was not altered.</p>
+            </section>
+
+            <!-- Webhook signing -->
+            

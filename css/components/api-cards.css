@@ -1,0 +1,82 @@
+/* API Reference Cards */
+.api-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    margin: var(--spacing-lg) 0;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.api-header {
+    background: var(--background-secondary);
+    padding: 0.75rem var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.api-endpoint {
+    font-family: var(--font-family-mono);
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.api-body {
+    padding: 1.25rem;
+}
+
+/* HTTP Method Badges */
+.http-method {
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    min-width: 60px;
+    text-align: center;
+}
+
+.method-get {
+    /* Not --blue-100: white on #16a3fe is 2.73:1, well under the 4.5:1 AA floor
+       for this 0.7rem label. Same hue, darkened until it passes (4.60:1). */
+    background: #0a7bc2;
+    color: white;
+}
+
+.method-post {
+    background: var(--blue-200);
+    color: white;
+}
+
+.method-patch,
+.method-put {
+    background: var(--warning);
+    color: white;
+}
+
+.method-delete {
+    background: var(--error);
+    color: white;
+}
+
+/* Endpoint path: the {placeholder} segments read as parameters, not literals. */
+.api-endpoint .api-param {
+    color: var(--blue-100);
+}
+
+.api-header .api-note {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Endpoint titles were <h4> and are now <h3> so the heading outline stops
+   skipping a level. These rules keep them rendering exactly as before, so the
+   change is semantic only. */
+.api-body h3 {
+    font-size: 1.1rem;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+}

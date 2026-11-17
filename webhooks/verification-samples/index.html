@@ -1,0 +1,421 @@
+---
+layout: default
+title: "Webhook Verification Samples"
+description: "Working webhook signature verification in Node.js, PHP, Python and C# — copy, paste and adapt."
+permalink: /webhooks/verification-samples/
+---
+<section class="section" id="webhook-samples">
+                <h2 id="verification-samples">Verification Samples</h2>
+                <p>Production-shaped receivers in four stacks. Each one reads the raw body, enforces a timestamp window, compares in constant time, supports two secrets during rotation, answers quickly and does the real work afterwards.</p>
+
+                <h3 id="nodejs-express">Node.js — Express</h3>
+                <div class="code-block">
+                    <div class="code-language">JavaScript</div>
+                    <pre>const express = require('express');
+const crypto = require('crypto');
+
+const app = express();
+
+// Accept the current secret and, during rotation, the previous one.
+const SIGNING_SECRETS = [
+  process.env.INFYNIPAY_WEBHOOK_SECRET,
+  process.env.INFYNIPAY_WEBHOOK_SECRET_PREVIOUS,
+].filter(Boolean);
+
+const TOLERANCE_SECONDS = 300; // 5 minutes
+
+/** Pull "t" and "v1" out of "t=...,v1=..." without assuming their order. */
+function parseSignatureHeader(header) {
+  const parts = {};
+  for (const piece of String(header || '').split(',')) {
+    const index = piece.indexOf('=');
+    if (index &gt; 0) parts[piece.slice(0, index).trim()] = piece.slice(index + 1).trim();
+  }
+  return { timestamp: parts.t, signature: parts.v1 };
+}
+
+/** The header is branded; accept the exact name and fall back to any *-signature. */
+function readSignatureHeader(req) {
+  const direct = req.get('X-InfyniPay-Signature');
+  if (direct) return direct;
+  for (const [name, value] of Object.entries(req.headers)) {
+    if (name.toLowerCase().endsWith('-signature') &amp;&amp; String(value).includes('v1=')) return value;
+  }
+  return null;
+}
+
+function timingSafeEqualHex(a, b) {
+  const bufferA = Buffer.from(String(a), 'hex');
+  const bufferB = Buffer.from(String(b), 'hex');
+  // Length must be compared first: timingSafeEqual throws on a mismatch.
+  return bufferA.length === bufferB.length &amp;&amp; crypto.timingSafeEqual(bufferA, bufferB);
+}
+
+function verify(rawBody, header) {
+  const { timestamp, signature } = parseSignatureHeader(header);
+  if (!timestamp || !signature) return false;
+
+  // Replay guard — reject anything too old, and anything from the future
+  // beyond a little clock skew.
+  const age = Math.floor(Date.now() / 1000) - Number(timestamp);
+  if (!Number.isFinite(age) || age &gt; TOLERANCE_SECONDS || age &lt; -TOLERANCE_SECONDS) return false;
+
+  const signedValue = `${timestamp}.${rawBody}`;
+  return SIGNING_SECRETS.some((secret) =&gt;
+    timingSafeEqualHex(
+      signature,
+      crypto.createHmac('sha256', secret).update(signedValue, 'utf8').digest('hex')
+    )
+  );
+}
+
+// express.raw keeps the exact bytes. Never put express.json() in front of this
+// route — a re-encoded body can no longer be verified.
+app.post(
+  '/infynipay/webhook',
+  express.raw({ type: 'application/json', limit: '256kb' }),
+  async (req, res) =&gt; {
+    const rawBody = req.body.toString('utf8');
+
+    if (!verify(rawBody, readSignatureHeader(req))) {
+      return res.status(400).send('invalid signature');
+    }
+
+    const { payment } = JSON.parse(rawBody);
+
+    // Answer immediately: slow handlers look like failures and get retried.
+    res.status(200).send('ok');
+
+    // Retries and out-of-order delivery are expected, so this must be safe to
+    // run twice, and it must trust the API rather than the payload.
+    try {
+      await syncOrder(payment.referenceId);
+    } catch (error) {
+      console.error('infynipay: sync failed', payment.referenceId, error);
+    }
+  }
+);
+
+async function syncOrder(referenceId) {
+  const response = await fetch(
+    `https://api.infynipay.com/api/apps/${process.env.INFYNIPAY_APP_ID}` +
+      `/payments/referenceId:${encodeURIComponent(referenceId)}`,
+    { headers: { Authorization: `Bearer ${process.env.INFYNIPAY_API_KEY}` } }
+  );
+  if (!response.ok) throw new Error(`payment lookup failed: ${response.status}`);
+
+  const payment = await response.json();
+  await applyPaymentState(referenceId, payment.paymentState); // your order logic
+}
+
+app.listen(3000);</pre>
+                </div>
+
+                <h3 id="php">PHP</h3>
+                <div class="code-block">
+                    <div class="code-language">PHP</div>
+                    <pre>&lt;?php
+declare(strict_types=1);
+
+const PH_TOLERANCE_SECONDS = 300;
+
+/** Current secret first, previous second while a rotation is in flight. */
+function ph_signing_secrets(): array
+{
+    return array_values(array_filter([
+        getenv('INFYNIPAY_WEBHOOK_SECRET') ?: null,
+        getenv('INFYNIPAY_WEBHOOK_SECRET_PREVIOUS') ?: null,
+    ]));
+}
+
+function ph_signature_header(): ?string
+{
+    // getallheaders() is not available on every SAPI; $_SERVER always is.
+    foreach ($_SERVER as $key =&gt; $value) {
+        if (strpos($key, 'HTTP_') !== 0) {
+            continue;
+        }
+        $name = strtolower(str_replace('_', '-', substr($key, 5)));
+        if ($name === 'x-infynipay-signature') {
+            return $value;
+        }
+        if (substr($name, -10) === '-signature' &amp;&amp; strpos($value, 'v1=') !== false) {
+            $fallback = $value;
+        }
+    }
+
+    return $fallback ?? null;
+}
+
+function ph_parse_signature(string $header): array
+{
+    $parts = [];
+    foreach (explode(',', $header) as $piece) {
+        $pair = explode('=', trim($piece), 2);
+        if (count($pair) === 2) {
+            $parts[$pair[0]] = $pair[1];
+        }
+    }
+
+    return [$parts['t'] ?? null, $parts['v1'] ?? null];
+}
+
+function ph_verify(string $rawBody, ?string $header): bool
+{
+    if ($header === null) {
+        return false;
+    }
+
+    [$timestamp, $signature] = ph_parse_signature($header);
+    if ($timestamp === null || $signature === null || !ctype_digit($timestamp)) {
+        return false;
+    }
+
+    $age = time() - (int) $timestamp;
+    if (abs($age) &gt; PH_TOLERANCE_SECONDS) {
+        return false; // replayed, or the clocks are too far apart
+    }
+
+    $signedValue = $timestamp . '.' . $rawBody;
+    foreach (ph_signing_secrets() as $secret) {
+        // hash_equals is the constant-time comparison; == would leak timing.
+        if (hash_equals(hash_hmac('sha256', $signedValue, $secret), $signature)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// --- request handling -------------------------------------------------------
+
+$rawBody = file_get_contents('php://input');   // the exact bytes that were signed
+
+if (!ph_verify($rawBody, ph_signature_header())) {
+    http_response_code(400);
+    exit('invalid signature');
+}
+
+$payload = json_decode($rawBody, true);
+if (json_last_error() !== JSON_ERROR_NONE || !isset($payload['payment']['referenceId'])) {
+    http_response_code(400);
+    exit('invalid payload');
+}
+
+// Acknowledge first, then reconcile against the API — the payload tells you
+// something changed, the API tells you what is true.
+http_response_code(200);
+echo 'ok';
+if (function_exists('fastcgi_finish_request')) {
+    fastcgi_finish_request();
+}
+
+ph_sync_order((string) $payload['payment']['referenceId']);</pre>
+                </div>
+
+                <h3 id="python-flask">Python — Flask</h3>
+                <div class="code-block">
+                    <div class="code-language">Python</div>
+                    <pre>import hashlib
+import hmac
+import os
+import time
+
+from flask import Flask, request
+
+app = Flask(__name__)
+
+TOLERANCE_SECONDS = 300
+SIGNING_SECRETS = [
+    secret
+    for secret in (
+        os.environ.get("INFYNIPAY_WEBHOOK_SECRET"),
+        os.environ.get("INFYNIPAY_WEBHOOK_SECRET_PREVIOUS"),
+    )
+    if secret
+]
+
+
+def signature_header() -&gt; str | None:
+    header = request.headers.get("X-InfyniPay-Signature")
+    if header:
+        return header
+    # The header name carries the brand; accept any *-Signature that looks right.
+    for name, value in request.headers.items():
+        if name.lower().endswith("-signature") and "v1=" in value:
+            return value
+    return None
+
+
+def parse_signature(header: str) -&gt; tuple[str | None, str | None]:
+    parts = {}
+    for piece in header.split(","):
+        key, _, value = piece.partition("=")
+        if value:
+            parts[key.strip()] = value.strip()
+    return parts.get("t"), parts.get("v1")
+
+
+def verify(raw_body: bytes, header: str | None) -&gt; bool:
+    if not header:
+        return False
+
+    timestamp, signature = parse_signature(header)
+    if not timestamp or not signature or not timestamp.isdigit():
+        return False
+
+    if abs(time.time() - int(timestamp)) &gt; TOLERANCE_SECONDS:
+        return False  # replay window exceeded
+
+    signed_value = timestamp.encode() + b"." + raw_body
+    for secret in SIGNING_SECRETS:
+        expected = hmac.new(secret.encode(), signed_value, hashlib.sha256).hexdigest()
+        # compare_digest keeps the comparison constant-time.
+        if hmac.compare_digest(expected, signature):
+            return True
+    return False
+
+
+@app.post("/infynipay/webhook")
+def infynipay_webhook():
+    # get_data() returns the untouched bytes; request.json would not.
+    raw_body = request.get_data()
+
+    if not verify(raw_body, signature_header()):
+        return "invalid signature", 400
+
+    payment = request.get_json(silent=True, force=True).get("payment", {})
+    reference_id = payment.get("referenceId")
+    if not reference_id:
+        return "invalid payload", 400
+
+    # Hand the slow part to a worker so the response stays fast; the task must
+    # be idempotent because retries are normal.
+    sync_order.delay(reference_id)
+    return "ok", 200</pre>
+                </div>
+
+                <h3 id="c-aspnet-core">C# — ASP.NET Core</h3>
+                <div class="code-block">
+                    <div class="code-language">C#</div>
+                    <pre>using System.Security.Cryptography;
+using System.Text;
+
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+var secrets = new[]
+{
+    builder.Configuration["InfyniPay:WebhookSecret"],
+    builder.Configuration["InfyniPay:WebhookSecretPrevious"]
+}.Where(s =&gt; !string.IsNullOrWhiteSpace(s)).Select(s =&gt; s!).ToArray();
+
+const int ToleranceSeconds = 300;
+
+app.MapPost("/infynipay/webhook", async (HttpRequest request, IOrderSync orderSync) =&gt;
+{
+    // Read the body exactly as received — model binding would reshape it.
+    using var reader = new StreamReader(request.Body, Encoding.UTF8);
+    var rawBody = await reader.ReadToEndAsync();
+
+    if (!TryReadSignature(request, out var header) || !Verify(rawBody, header, secrets))
+        return Results.BadRequest("invalid signature");
+
+    var payload = System.Text.Json.JsonSerializer.Deserialize&lt;WebhookPayload&gt;(rawBody);
+    if (payload?.Payment?.ReferenceId is not { Length: &gt; 0 } referenceId)
+        return Results.BadRequest("invalid payload");
+
+    // Queue the reconciliation; respond now so the delivery is not retried.
+    orderSync.Enqueue(referenceId);
+    return Results.Ok();
+});
+
+static bool TryReadSignature(HttpRequest request, out string header)
+{
+    if (request.Headers.TryGetValue("X-InfyniPay-Signature", out var exact))
+    {
+        header = exact.ToString();
+        return true;
+    }
+
+    foreach (var candidate in request.Headers)
+    {
+        if (candidate.Key.EndsWith("-Signature", StringComparison.OrdinalIgnoreCase) &amp;&amp;
+            candidate.Value.ToString().Contains("v1=", StringComparison.Ordinal))
+        {
+            header = candidate.Value.ToString();
+            return true;
+        }
+    }
+
+    header = string.Empty;
+    return false;
+}
+
+static bool Verify(string rawBody, string header, IReadOnlyList&lt;string&gt; secrets)
+{
+    string? timestamp = null, signature = null;
+    foreach (var piece in header.Split(','))
+    {
+        var pair = piece.Split('=', 2);
+        if (pair.Length != 2) continue;
+        if (pair[0].Trim() == "t") timestamp = pair[1].Trim();
+        else if (pair[0].Trim() == "v1") signature = pair[1].Trim();
+    }
+
+    if (timestamp is null || signature is null || !long.TryParse(timestamp, out var sentAt))
+        return false;
+
+    var age = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - sentAt;
+    if (Math.Abs(age) &gt; ToleranceSeconds) return false;
+
+    // Compare the hex text rather than decoding it: a hostile sender can put
+    // anything in v1, and Convert.FromHexString would throw on malformed
+    // input — turning a webhook that should be rejected into a 500.
+    var signedValue = Encoding.UTF8.GetBytes($"{timestamp}.{rawBody}");
+    var provided = Encoding.UTF8.GetBytes(signature.ToLowerInvariant());
+
+    foreach (var secret in secrets)
+    {
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
+        var expected = Encoding.UTF8.GetBytes(
+            Convert.ToHexString(hmac.ComputeHash(signedValue)).ToLowerInvariant());
+
+        // FixedTimeEquals is the constant-time comparison; the length check in
+        // front of it is required because it demands equal-length spans.
+        if (provided.Length == expected.Length &amp;&amp; CryptographicOperations.FixedTimeEquals(provided, expected))
+            return true;
+    }
+
+    return false;
+}
+
+app.Run();
+
+public sealed record WebhookPayload(PaymentDto? Payment);
+public sealed record PaymentDto(long PaymentId, string PaymentState, int PaymentStateId, string ReferenceId);</pre>
+                </div>
+
+                <h3 id="rotation">Rotating the secret without downtime</h3>
+                <ol style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Deploy your receiver with the current secret in <code>…_SECRET</code> and nothing in <code>…_SECRET_PREVIOUS</code>.</li>
+                    <li>Move the current value into <code>…_SECRET_PREVIOUS</code> and deploy — the receiver now accepts both.</li>
+                    <li>Rotate in the Console (or <code>POST /webhook-signing-secret</code>), put the new value in <code>…_SECRET</code>, deploy.</li>
+                    <li>Once traffic settles, clear <code>…_SECRET_PREVIOUS</code> and deploy again.</li>
+                </ol>
+
+                <h3 id="receiver-checklist">Receiver checklist</h3>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li><strong>HTTPS only</strong>, with a certificate that validates. A signature does not protect a plaintext channel.</li>
+                    <li><strong>Verify before parsing</strong>, and verify against the raw bytes.</li>
+                    <li><strong>Constant-time compare</strong> — <code>hash_equals</code>, <code>timingSafeEqual</code>, <code>compare_digest</code>, <code>FixedTimeEquals</code>. Never <code>==</code>.</li>
+                    <li><strong>Enforce the timestamp window</strong> so a captured request cannot be replayed later.</li>
+                    <li><strong>Be idempotent.</strong> Key on <code>paymentId</code> plus <code>paymentState</code>, and ignore transitions that would move an order backwards.</li>
+                    <li><strong>Answer in under a few seconds.</strong> Acknowledge, then do the work — a slow handler is retried as if it failed.</li>
+                    <li><strong>Re-read the payment from the API</strong> before shipping goods or granting access.</li>
+                    <li><strong>Log rejections</strong> with the reason. A sudden run of signature failures usually means a rotation that only got half deployed.</li>
+                </ul>
+            </section>
+
+            <!-- Integrations -->
+            

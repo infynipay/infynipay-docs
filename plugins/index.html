@@ -1,0 +1,68 @@
+---
+layout: default
+title: "Plugins and Integrations"
+description: "Ready-made InfyniPay payment plugins for WooCommerce, WHMCS, VirtueMart, Phoca Cart and J2Commerce."
+permalink: /plugins/
+---
+<section class="section" id="integrations">
+                <h2 id="plugins-amp-integrations">Plugins &amp; Integrations</h2>
+                <p>If you run one of these platforms, you do not need the API at all — install the plugin, paste your App ID and API key, and InfyniPay handles checkout, webhooks and refunds for you. Every plugin is free and open source.</p>
+
+                <div class="quick-start-grid">
+                    <div class="quick-start-card">
+                        <div class="quick-start-icon">{% include icon.html name="file-invoice-dollar" %}</div>
+                        <h3 id="whmcs-2">WHMCS</h3>
+                        <p>Payment gateway module for WHMCS billing, including recurring invoices.</p>
+                        <span class="status-badge status-live">Available</span>
+                    </div>
+                    <div class="quick-start-card">
+                        <div class="quick-start-icon">{% include icon.html name="wordpress" %}</div>
+                        <h3 id="woocommerce-2">WooCommerce</h3>
+                        <p>Payment gateway plugin for WordPress stores, with block checkout support.</p>
+                        <span class="status-badge status-live">Available</span>
+                    </div>
+                    <div class="quick-start-card">
+                        <div class="quick-start-icon">{% include icon.html name="joomla" %}</div>
+                        <h3 id="joomla-carts">Joomla carts</h3>
+                        <p>Phoca Cart, VirtueMart and J2Commerce payment plugins for Joomla.</p>
+                        <span class="status-badge status-live">Available</span>
+                    </div>
+                </div>
+
+                <h3 id="whmcs">WHMCS</h3>
+                <ol style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Download the module from the <a href="https://www.infynipay.com/integrations/whmcs/" target="_blank" rel="noopener">WHMCS integration page<span class="sr-only"> (opens in new tab)</span></a>.</li>
+                    <li>Upload it to <code>/modules/gateways/</code> in your WHMCS installation.</li>
+                    <li>In the WHMCS admin, open <strong>Setup → Payments → Payment Gateways</strong> and activate InfyniPay.</li>
+                    <li>Paste the App ID and API key for the environment you are configuring, and save.</li>
+                </ol>
+
+                <h3 id="woocommerce">WooCommerce</h3>
+                <ol style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Install and activate the plugin from the <a href="https://www.infynipay.com/integrations/woocommerce/" target="_blank" rel="noopener">WooCommerce integration page<span class="sr-only"> (opens in new tab)</span></a>.</li>
+                    <li>Open <strong>WooCommerce → Settings → Payments → InfyniPay</strong>.</li>
+                    <li>Enter the sandbox and live credentials; tick <em>Use sandbox credentials for checkout</em> while testing.</li>
+                    <li>Save. The plugin registers its own webhook URL with InfyniPay automatically.</li>
+                </ol>
+                <div class="callout callout-warning">
+                    {% include icon.html name="triangle-exclamation" %}
+                    <p>A store running on <code>localhost</code> cannot receive webhooks. Use a public domain, or a tunnel such as Cloudflare Tunnel or ngrok, before taking live payments.</p>
+                </div>
+
+                <h3 id="joomla">Joomla carts</h3>
+                <p>Phoca Cart, VirtueMart and J2Commerce each have their own plugin; install it through Joomla's extension manager, then open the plugin and enter your credentials. Installation guides are on the integration pages:</p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li><a href="https://www.infynipay.com/integrations/phoca-cart/" target="_blank" rel="noopener">Phoca Cart<span class="sr-only"> (opens in new tab)</span></a></li>
+                    <li><a href="https://www.infynipay.com/integrations/virtuemart/" target="_blank" rel="noopener">VirtueMart<span class="sr-only"> (opens in new tab)</span></a></li>
+                    <li><a href="https://www.infynipay.com/integrations/j2commerce/" target="_blank" rel="noopener">J2Commerce<span class="sr-only"> (opens in new tab)</span></a></li>
+                </ul>
+
+                <h3 id="source-code">Source code</h3>
+                <p>All plugins are published at <a href="https://github.com/infynipay" target="_blank" rel="noopener">github.com/infynipay<span class="sr-only"> (opens in new tab)</span></a> — useful as reference implementations of the create-payment, return-URL and webhook flows described here.</p>
+
+                <h3 id="custom-integration">Custom integration</h3>
+                <p>On any other platform, follow <a href="/quickstart/">Quick Start</a>: create a payment, redirect to <code>redirectUrl</code>, verify the webhook, read the payment back. Custom integrations get the same free support as the plugins.</p>
+            </section>
+
+            <!-- Errors -->
+            

@@ -1,0 +1,83 @@
+/* Callouts — notes, warnings and security advisories inside a section */
+.callout {
+    display: flex;
+    gap: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--primary-color);
+    border-radius: var(--border-radius-md);
+    background: var(--background-secondary);
+    padding: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+}
+
+.callout i {
+    color: var(--primary-color);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.callout p:last-child,
+.callout ul:last-child {
+    margin-bottom: 0;
+}
+
+.callout-warning {
+    border-left-color: var(--warning);
+}
+
+.callout-warning i {
+    color: var(--warning);
+}
+
+.callout-danger {
+    border-left-color: var(--error);
+}
+
+.callout-danger i {
+    color: var(--error);
+}
+
+/* Definition-style key/value list used for base URLs and credentials */
+.kv-list {
+    list-style: none;
+    margin: var(--spacing-md) 0;
+    padding: 0;
+}
+
+.kv-list li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.kv-list li:last-child {
+    border-bottom: none;
+}
+
+.kv-list .kv-key {
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 170px;
+}
+
+/* Provider chips on the overview */
+.chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin: var(--spacing-md) 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chip-row li {
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-xl);
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}

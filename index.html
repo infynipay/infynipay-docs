@@ -1,0 +1,60 @@
+---
+layout: default
+title: "InfyniPay API Documentation"
+description: "REST API reference for InfyniPay: hosted checkout, payments, customers, HMAC-signed webhooks and the e-commerce plugins."
+permalink: /
+---
+<section class="section" id="overview">
+                <h1>InfyniPay Documentation</h1>
+                <p>REST API reference for InfyniPay. Every endpoint is JSON over HTTPS, scoped to an app, and authenticated with a bearer API key.</p>
+
+                <div class="table-scroll">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Base URL</td>
+                            <td><code>https://api.infynipay.com</code></td>
+                        </tr>
+                        <tr>
+                            <td>Path prefix</td>
+                            <td><code>/api/apps/{appId}</code></td>
+                        </tr>
+                        <tr>
+                            <td>Authentication</td>
+                            <td><code>Authorization: Bearer YOUR_API_KEY</code></td>
+                        </tr>
+                        <tr>
+                            <td>Content type</td>
+                            <td><code>application/json</code></td>
+                        </tr>
+                        <tr>
+                            <td>OpenAPI spec</td>
+                            <td><code>/swagger/v1/swagger.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>Amounts</td>
+                            <td>Decimal in major units, two decimal places — <code>10.23</code> is ten dollars twenty-three cents</td>
+                        </tr>
+                        <tr>
+                            <td>Idempotency</td>
+                            <td><code>referenceId</code> on create — unique per app</td>
+                        </tr>
+                        <tr>
+                            <td>Timestamps</td>
+                            <td>ISO-8601, UTC</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <p>A payment is created against your app, the customer pays on the hosted checkout page, and a webhook reports each state change. <a href="/quickstart/">Quick Start</a> walks through one end to end; <a href="/webhooks/signing/">HMAC Signing</a> covers verifying the callbacks.</p>
+            </section>
+
+            <!-- Quick Start Section -->
+            

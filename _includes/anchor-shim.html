@@ -1,0 +1,40 @@
+{%- comment -%}
+  Redirects legacy deep links from when this documentation lived on one URL.
+
+  This is the one breakage a URL split cannot fix on the server: a fragment is
+  never sent in the HTTP request, so `docs.infynipay.com/#webhooks` arrives
+  looking exactly like `docs.infynipay.com/`. No redirect rule, rewrite or 301
+  can see it. The repair has to happen in the browser.
+
+  Those links exist in plugin READMEs, in support email, in issue threads and
+  anywhere else someone pasted one — none of which can be audited or updated.
+  Without this they land on the home page and silently show the wrong content.
+
+  Only fires when the hash matches no element on the current page, so a genuine
+  same-page anchor (#rotation on the signing page, say) still works normally.
+  Uses location.replace so the dead URL does not end up in the back history.
+
+  Rendered on the home page only: that is where every legacy link lands.
+{%- endcomment -%}
+<script>
+  (function () {
+    var hash = window.location.hash;
+    if (!hash || hash.length < 2) return;
+
+    var id = hash.slice(1);
+    // A real anchor on this page wins — never redirect away from working content.
+    try { if (document.getElementById(id)) return; } catch (e) { return; }
+
+    var moved = {
+      {%- assign pairs = site.data.legacy_anchors | sort -%}
+      {%- for pair in pairs %}
+      {{ pair[0] | jsonify }}: {{ pair[1] | relative_url | jsonify }}{% unless forloop.last %},{% endunless %}
+      {%- endfor %}
+    };
+
+    var target = moved[id];
+    if (target && target !== window.location.pathname) {
+      window.location.replace(target);
+    }
+  })();
+</script>

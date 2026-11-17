@@ -1,0 +1,69 @@
+---
+layout: default
+title: "Refunds and Cancellations"
+description: "Refund a captured payment or cancel one before it is captured, and how the two differ."
+permalink: /payments/refunds-and-cancellations/
+---
+                <!-- Refund -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="http-method method-post">POST</span>
+                        <span class="api-endpoint">/api/apps/<span class="api-param">{appId}</span>/payments/<span class="api-param">{paymentId}</span>/refund</span>
+                        <span class="api-note">200 OK</span>
+                    </div>
+                    <div class="api-body">
+                        <h3 id="refund-a-captured-payment">Refund a captured payment</h3>
+                        <p>Returns the money to the customer through the original provider.</p>
+                        <div class="table-scroll">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>In</th>
+                                    <th>Required</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>paymentId</code></td>
+                                    <td>path</td>
+                                    <td>Yes</td>
+                                    <td>Numeric payment id.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>description</code></td>
+                                    <td>query</td>
+                                    <td>No</td>
+                                    <td>Reason recorded against the refund, visible in the Console.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-language">cURL</div>
+                            <pre>curl -X POST "https://api.infynipay.com/api/apps/YOUR_APP_ID/payments/90210/refund?description=Customer%20returned%20item" \
+  -H "Authorization: Bearer YOUR_API_KEY"</pre>
+                        </div>
+                        <p>The payment goes to <code>Refunding</code> and then <code>Refunded</code> once the provider confirms. Do not release goods or credit the customer twice — wait for <code>Refunded</code>.</p>
+                    </div>
+                </div>
+
+                <!-- Cancel -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="http-method method-post">POST</span>
+                        <span class="api-endpoint">/api/apps/<span class="api-param">{appId}</span>/payments/<span class="api-param">{paymentId}</span>/cancel</span>
+                        <span class="api-note">200 OK</span>
+                    </div>
+                    <div class="api-body">
+                        <h3 id="cancel-a-payment">Cancel a payment</h3>
+                        <p>Voids a payment that has not been captured — an abandoned checkout, or an authorisation you have decided not to settle. The payment passes through <code>Cancelling</code>; captured payments must be refunded instead.</p>
+                        <div class="code-block">
+                            <div class="code-language">cURL</div>
+                            <pre>curl -X POST https://api.infynipay.com/api/apps/YOUR_APP_ID/payments/90210/cancel \
+  -H "Authorization: Bearer YOUR_API_KEY"</pre>
+                        </div>
+                        <p>Two related endpoints handle held payments: <code>POST /payments/{paymentId}/unhold</code> releases a payment held by a fraud rule, and <code>POST /payments/{paymentId}/recheck</code> re-queries the provider when you suspect the state is stale.</p>
+                    </div>
+                </div>

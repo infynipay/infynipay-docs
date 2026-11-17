@@ -1,0 +1,64 @@
+name: Build and deploy Jekyll site to GitHub Pages
+
+# Why this exists, stated accurately:
+#
+# The repository has no .nojekyll, so GitHub's legacy branch builder already
+# runs Jekyll and WOULD build the layout introduced here — layouts are core
+# Jekyll, and both plugins below are on the Pages allowlist. Switching Pages to
+# "GitHub Actions" is therefore an improvement, not a rescue.
+#
+# The reason to switch anyway is version parity. The legacy builder pins its own
+# Jekyll (3.9) and ignores the Gemfile, so what ships is not what was built and
+# tested locally. infynipay-product-www moved off it for exactly this reason and its
+# CLAUDE.md warns against going back. Owning the build here too also leaves room
+# for steps the allowlist cannot express, the way www runs PurgeCSS.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Build with Jekyll
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        env:
+          JEKYLL_ENV: production
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,103 @@
+---
+layout: default
+title: "Charge a Stored Payment Method"
+description: "Charge a payment method the customer has already authorised, for card-on-file and recurring billing."
+permalink: /payments/charge-stored-method/
+---
+                <!-- Auto payment -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="http-method method-post">POST</span>
+                        <span class="api-endpoint">/api/apps/<span class="api-param">{appId}</span>/payments/auto-payment</span>
+                        <span class="api-note">200 OK</span>
+                    </div>
+                    <div class="api-body">
+                        <h3 id="charge-a-stored-payment-method">Charge a stored payment method</h3>
+                        <p>Charges a customer who is not present, using a payment method they registered earlier (a payment created with <code>registerAutoPayment: true</code>). This is how subscriptions, renewals and instalments are billed.</p>
+
+                        <h4>Body parameters</h4>
+                        <div class="table-scroll">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Required</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>referenceId</code></td>
+                                    <td>string</td>
+                                    <td>Yes</td>
+                                    <td>Your identifier for this charge, and its idempotency key — for a subscription use the invoice number, not the subscription id, so each cycle is a distinct value.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>amount</code></td>
+                                    <td>number</td>
+                                    <td>Yes</td>
+                                    <td>Amount to charge, as a decimal in major units with up to two decimal places (<code>10.23</code>).</td>
+                                </tr>
+                                <tr>
+                                    <td><code>autoCapture</code></td>
+                                    <td>boolean</td>
+                                    <td>Yes</td>
+                                    <td>Capture immediately, or authorise now and capture later.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>customerOrder</code></td>
+                                    <td>object</td>
+                                    <td>Yes</td>
+                                    <td>Same shape as above; <code>customer.customerId</code> identifies whose stored method to use.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>paymentMethodId</code></td>
+                                    <td>integer</td>
+                                    <td>No</td>
+                                    <td>Charge one specific stored method. List a customer's methods with the Customers API.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>paymentMethodProviderProfileId</code></td>
+                                    <td>integer</td>
+                                    <td>No</td>
+                                    <td>Force a particular provider profile for this charge.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>webhookUrl</code></td>
+                                    <td>string</td>
+                                    <td>No</td>
+                                    <td>Per-charge webhook endpoint.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>fraudPolicyId</code></td>
+                                    <td>integer</td>
+                                    <td>No</td>
+                                    <td>Override the app's default fraud policy.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-language">cURL</div>
+                            <pre>curl -X POST https://api.infynipay.com/api/apps/YOUR_APP_ID/payments/auto-payment \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "referenceId": "invoice-2042",
+    "amount": 9.99,
+    "autoCapture": true,
+    "customerOrder": {
+      "customer": { "customerId": "cus-42", "email": "ada@example.com" },
+      "description": "Monthly plan — August"
+    }
+  }'</pre>
+                        </div>
+
+                        <div class="callout callout-warning">
+                            {% include icon.html name="triangle-exclamation" %}
+                            <p>An auto payment can still fail — expired card, insufficient funds, a provider-side block. Treat the returned state as the result and retry on your own schedule; never assume success because the request returned <code>200</code>.</p>
+                        </div>
+                    </div>
+                </div>

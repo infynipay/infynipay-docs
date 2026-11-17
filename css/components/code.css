@@ -1,0 +1,73 @@
+/* Code Blocks and Syntax Highlighting */
+.code-block {
+    background: var(--code-block-bg);
+    border: 1px solid var(--blue-600);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl) var(--spacing-md) var(--spacing-md);
+    margin: var(--spacing-md) 0;
+    overflow-x: auto;
+    position: relative;
+    font-size: 0.85rem;
+}
+
+.code-block pre {
+    margin: 0;
+    font-family: var(--font-family-mono);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    white-space: pre;
+    word-wrap: normal;
+    color: var(--code-block-text);
+}
+
+.code-block code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+}
+
+.code-language {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    background: rgba(var(--blue-100-rgb), 0.18);
+    color: var(--blue-50);
+    padding: 0.2rem var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+}
+
+/* Copy button — injected by js/docs.js, so it never appears without JS. */
+.code-copy {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: 5rem;
+    background: rgba(var(--blue-100-rgb), 0.18);
+    color: var(--blue-50);
+    border: 0;
+    padding: 0.2rem var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.7rem;
+    font-family: var(--font-family-primary);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.code-copy:hover,
+.code-copy:focus-visible {
+    background: rgba(var(--blue-100-rgb), 0.35);
+    color: #ffffff;
+}
+
+/* Inline Code */
+code {
+    background: var(--code-bg);
+    padding: 0.2rem 0.4rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.8rem;
+    color: var(--blue-200);
+    font-family: var(--font-family-mono);
+}

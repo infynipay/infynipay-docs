@@ -1,0 +1,85 @@
+---
+layout: default
+title: "Payment States"
+description: "Every state a InfyniPay payment moves through, which are terminal, and how fraud status is reported."
+permalink: /payments/states/
+---
+<section class="section" id="payment-states">
+                <h2 id="payment-states-2">Payment States</h2>
+                <p>Every payment carries a <code>paymentState</code>. Drive your order logic from these values, and never downgrade an order that has already reached a later state — webhooks can arrive out of order.</p>
+
+                <div class="table-scroll">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>State</th>
+                            <th>Meaning</th>
+                            <th>What to do</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>Created</code></td>
+                            <td>Payment exists; the customer has not paid yet.</td>
+                            <td>Hold the order as pending.</td>
+                        </tr>
+                        <tr>
+                            <td><code>SaleInProgress</code></td>
+                            <td>The customer is going through checkout.</td>
+                            <td>Keep waiting.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Authorizing</code> / <code>Authorized</code></td>
+                            <td>Funds are being, or have been, reserved on the payment method.</td>
+                            <td>Capture when you are ready to fulfil (if <code>autoCapture</code> was false).</td>
+                        </tr>
+                        <tr>
+                            <td><code>Approved</code></td>
+                            <td>The provider approved the transaction.</td>
+                            <td>Keep waiting for capture.</td>
+                        </tr>
+                        <tr>
+                            <td><code>ProviderAuthorizedHold</code> / <code>CapturedHold</code></td>
+                            <td>Authorised or captured, but held for review — usually a fraud rule.</td>
+                            <td>Review in the Console; release with <code>unhold</code> or cancel.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Capturing</code></td>
+                            <td>Capture is in flight.</td>
+                            <td>Keep waiting.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Captured</code></td>
+                            <td>Money settled with the provider. <strong>Terminal success.</strong></td>
+                            <td>Fulfil the order.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Cancelling</code></td>
+                            <td>A cancellation is being processed.</td>
+                            <td>Keep the order on hold.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Failed</code></td>
+                            <td>The payment cannot succeed. <strong>Terminal.</strong></td>
+                            <td>Cancel the order and release reserved stock. <code>lastError</code> explains why.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Refunding</code> / <code>Refunded</code></td>
+                            <td>A refund is in flight, or complete.</td>
+                            <td>Mark the order refunded only on <code>Refunded</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Disputed</code></td>
+                            <td>The customer raised a chargeback with their bank.</td>
+                            <td>Flag for manual review; do not restore stock automatically.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h3 id="fraud-status">Fraud status</h3>
+                <p>Alongside the state, <code>fraudStatus</code> reports what the risk engine decided: <code>Unknown</code>, <code>Verified</code>, <code>RuleViolated</code>, <code>Suspicious</code>, <code>Fraudulent</code> or <code>Ignored</code>. Rules are configured per app as fraud policies, and a payment can name a specific policy with <code>fraudPolicyId</code>.</p>
+            </section>
+
+            <!-- Customers -->
+            

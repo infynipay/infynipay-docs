@@ -1,0 +1,297 @@
+---
+layout: default
+title: "Payments API"
+description: "Create a hosted-page or direct payment, capture an authorisation, and retrieve a payment — with the full request field reference."
+permalink: /payments/
+---
+<section class="section" id="payments">
+                <h2 id="payments-api">Payments API</h2>
+                <p>All payment endpoints live under <code>/api/apps/{appId}/payments</code> on <code>https://api.infynipay.com</code>. <code>{appId}</code> is your App ID and every call needs the <code>Authorization</code> header.</p>
+
+                <!-- Create hosted-page payment -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="http-method method-post">POST</span>
+                        <span class="api-endpoint">/api/apps/<span class="api-param">{appId}</span>/payments/hosted-page</span>
+                        <span class="api-note">201 Created</span>
+                    </div>
+                    <div class="api-body">
+                        <h3 id="create-a-hosted-page-payment">Create a hosted-page payment</h3>
+                        <p>The usual starting point: creates a payment and returns a <code>redirectUrl</code> for the InfyniPay checkout page, where the customer chooses a provider and pays.</p>
+
+                        <h4>Minimum request</h4>
+                        <p>This is the smallest body that creates a working checkout. Everything else is optional and layers on top of it.</p>
+                        <div class="code-block">
+                            <div class="code-language">JSON</div>
+                            <pre>{
+  "referenceId": "1f8c3b52-2a4e-4d61-9f0b-7c2f5a9e4d10",
+  "amount": 1,
+  "returnUrl": "https://your-store.example/checkout/return",
+  "currency": "USD",
+  "autoCapture": false,
+  "showPayRecurringInCheckout": true,
+  "customerOrder": {
+    "customer": {
+      "customerId": "66d99d177234"
+    }
+  }
+}</pre>
+                        </div>
+
+                        <div class="callout">
+                            {% include icon.html name="fingerprint" %}
+                            <p><strong><code>referenceId</code> is the idempotency key.</strong> It must be unique across your app — InfyniPay will not create a second payment for a value it has already seen. Send a value you can regenerate deterministically (your order number) or a GUID you store with the order, and retrying a failed create is then safe.</p>
+                        </div>
+
+                        <h4>Required fields</h4>
+                        <div class="table-scroll">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>referenceId</code></td>
+                                    <td>string</td>
+                                    <td>Your order identifier, and the idempotency key. Unique per app; also how you fetch the payment later.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>amount</code></td>
+                                    <td>number</td>
+                                    <td>Total to charge, as a decimal in major units with up to two decimal places — <code>10.23</code>, <code>20.00</code>, <code>1</code>. Not minor units: do not send cents.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>currency</code></td>
+                                    <td>string</td>
+                                    <td>Three-letter code from the <a href="/authentication/#environments">supported currencies</a>.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>returnUrl</code></td>
+                                    <td>string</td>
+                                    <td>Where the checkout sends the customer's browser when they finish. Without it they have nowhere to land.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>autoCapture</code></td>
+                                    <td>boolean</td>
+                                    <td><code>true</code> captures as soon as the payment is authorised; <code>false</code> authorises only and you <a href="/payments/">capture</a> later.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>showPayRecurringInCheckout</code></td>
+                                    <td>boolean</td>
+                                    <td>Whether the checkout offers the customer a recurring/save-my-method option.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>customerOrder.customer.customerId</code></td>
+                                    <td>string</td>
+                                    <td>Your identifier for the buyer. Reuse it across orders and they build up one customer record with reusable payment methods.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+
+                        <h4>Optional fields</h4>
+                        <div class="table-scroll">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>webhookUrl</code></td>
+                                    <td>string</td>
+                                    <td>Per-payment webhook endpoint. Falls back to the app-level URL configured in the Console.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>registerAutoPayment</code></td>
+                                    <td>boolean</td>
+                                    <td>Store the payment method for later charges without the customer present. Defaults to <code>false</code>; see <a href="/payments/">auto payments</a>.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>expirationTime</code></td>
+                                    <td>string</td>
+                                    <td>ISO-8601 instant after which the checkout link stops working.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>paymentProfiles</code></td>
+                                    <td>integer[]</td>
+                                    <td>Restrict the checkout to specific provider profiles. Omit to offer everything active on the app.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>checkoutMethods</code></td>
+                                    <td>string[]</td>
+                                    <td>Restrict which payment method types appear — <code>CreditCard</code>, <code>ElectronicCheck</code>, <code>Crypto</code>, <code>Paypal</code>.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>fraudPolicyId</code></td>
+                                    <td>integer</td>
+                                    <td>Apply a specific fraud policy instead of the app default.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>customerOrder.*</code></td>
+                                    <td>object</td>
+                                    <td>Buyer contact detail and the basket breakdown — see below. Providers use it for risk scoring and receipts.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+
+                        <h4>customerOrder</h4>
+                        <div class="table-scroll">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Required</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>customer.customerId</code></td>
+                                    <td>string</td>
+                                    <td>Yes</td>
+                                    <td>The one required member — your identifier for the buyer.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>customer.firstName</code>, <code>lastName</code>, <code>email</code>, <code>phoneNumber</code></td>
+                                    <td>string</td>
+                                    <td>No</td>
+                                    <td>Buyer contact detail shown on the checkout and passed to the provider.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>orderId</code></td>
+                                    <td>string</td>
+                                    <td>No</td>
+                                    <td>Order number as the buyer sees it.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>description</code></td>
+                                    <td>string</td>
+                                    <td>No</td>
+                                    <td>Shown on the checkout page and in the Console.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>amount.total</code>, <code>shipping</code>, <code>totalTax</code>, <code>discount</code>, <code>handling</code>, <code>insurance</code></td>
+                                    <td>number</td>
+                                    <td>No</td>
+                                    <td>Order breakdown. Some providers require it to itemise the charge.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>amount.items[]</code></td>
+                                    <td>array</td>
+                                    <td>No</td>
+                                    <td>Line items: <code>name</code>, <code>amount</code>, <code>quantity</code> and <code>category</code> (<code>DigitalGoods</code> or <code>PhysicalGoods</code>) are required per item; <code>sku</code>, <code>tax</code> and <code>description</code> are optional.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create payment -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="http-method method-post">POST</span>
+                        <span class="api-endpoint">/api/apps/<span class="api-param">{appId}</span>/payments</span>
+                        <span class="api-note">201 Created</span>
+                    </div>
+                    <div class="api-body">
+                        <h3 id="create-a-payment">Create a payment</h3>
+                        <p>Creates a payment without pre-selecting the hosted checkout flow, and returns the same payment object. It takes <code>referenceId</code>, <code>amount</code>, <code>currency</code>, <code>customerOrder</code>, <code>autoCapture</code> and <code>registerAutoPayment</code>; the checkout-only fields (<code>showPayRecurringInCheckout</code>, <code>paymentProfiles</code>, <code>checkoutMethods</code>) do not apply here.</p>
+                        <p>A companion endpoint, <code>POST /api/apps/{appId}/payments/provider-hosted-page</code>, sends the customer straight to one provider's own hosted page; it takes the same fields plus a required <code>paymentProfileId</code> naming that provider profile.</p>
+                    </div>
+                </div>
+
+                <!-- Capture -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="http-method method-post">POST</span>
+                        <span class="api-endpoint">/api/apps/<span class="api-param">{appId}</span>/payments/<span class="api-param">{paymentId}</span>/capture</span>
+                        <span class="api-note">200 OK</span>
+                    </div>
+                    <div class="api-body">
+                        <h3 id="capture-an-authorised-payment">Capture an authorised payment</h3>
+                        <p>Settles a payment that was authorised with <code>autoCapture: false</code>. <code>{paymentId}</code> is the numeric <code>paymentId</code> from the create call — not your <code>referenceId</code>.</p>
+                        <div class="code-block">
+                            <div class="code-language">cURL</div>
+                            <pre>curl -X POST https://api.infynipay.com/api/apps/YOUR_APP_ID/payments/90210/capture \
+  -H "Authorization: Bearer YOUR_API_KEY"</pre>
+                        </div>
+                        <p>The payment moves through <code>Capturing</code> to <code>Captured</code>; a webhook is sent for each state change. Authorisations expire — capture within the window your provider allows, or the funds are released.</p>
+                    </div>
+                </div>
+
+                <!-- Get by reference -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="http-method method-get">GET</span>
+                        <span class="api-endpoint">/api/apps/<span class="api-param">{appId}</span>/payments/referenceId:<span class="api-param">{referenceId}</span></span>
+                        <span class="api-note">200 OK</span>
+                    </div>
+                    <div class="api-body">
+                        <h3 id="retrieve-a-payment-by-your-reference">Retrieve a payment by your reference</h3>
+                        <p>Looks a payment up by the <code>referenceId</code> you supplied — your order number — so you never have to store ours. <code>GET /api/apps/{appId}/payments/{paymentId}</code> does the same by numeric id.</p>
+                        <p>This is the call to make when a webhook arrives: the webhook tells you <em>something changed</em>, this tells you <em>what is true now</em>.</p>
+                        <div class="code-block">
+                            <div class="code-language">cURL</div>
+                            <pre>curl "https://api.infynipay.com/api/apps/YOUR_APP_ID/payments/referenceId:order-1001" \
+  -H "Authorization: Bearer YOUR_API_KEY"</pre>
+                        </div>
+
+                        <h4>Response (abridged)</h4>
+                        <div class="code-block">
+                            <div class="code-language">JSON</div>
+                            <pre>{
+  "appId": "YOUR_APP_ID",
+  "paymentId": 90210,
+  "paymentState": "Captured",
+  "paymentStateId": 7,
+  "amount": 20.00,
+  "capturedAmount": 20.00,
+  "referenceId": "order-1001",
+  "currency": "USD",
+  "autoCapture": true,
+  "autoPayment": "None",
+  "fraudStatus": "Verified",
+  "customerId": "cus-42",
+  "payerIp": "203.0.113.9",
+  "createdTime": "2026-08-03T09:15:00Z",
+  "payInfo": {
+    "providerReferenceId": "PROVIDER-REF-123",
+    "authorizeId": "AUTH-123",
+    "captureId": "CAP-456",
+    "providerFee": 0.88,
+    "paymentProfile": {
+      "paymentProfileId": 12,
+      "paymentProfileName": "Stripe USD",
+      "paymentMethodTypeString": "CreditCard",
+      "isActive": true
+    },
+    "payer": {
+      "fullName": "Ada Lovelace",
+      "email": "ada@example.com",
+      "country": "GB",
+      "card": { "cardBrand": "visa", "cardType": "Credit", "cardExpiryMonth": 12, "cardExpiryYear": 2029 }
+    }
+  }
+}</pre>
+                        </div>
+                        <div class="callout">
+                            {% include icon.html name="circle-info" %}
+                            <p>Card data in <code>payer.card</code> is limited to non-sensitive metadata — brand, type and expiry. The full number is never stored by InfyniPay and never returned by the API.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payment States -->
+            

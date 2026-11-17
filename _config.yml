@@ -1,0 +1,45 @@
+# Jekyll configuration for docs.infynipay.com
+#
+# This site was a single hand-written index.html with no build step. The layout
+# was extracted so that the head, header and sidebar exist once instead of being
+# copied into every future page — which is the prerequisite for splitting the
+# documentation into separate URLs. Nothing about the rendered output changed in
+# that step; it is deliberately a structural move only.
+
+title: InfyniPay Documentation
+description: >-
+  Developer documentation for InfyniPay: hosted checkout and payment API,
+  customers, auto payments, HMAC-signed webhooks, and the WHMCS, WooCommerce,
+  Phoca Cart, VirtueMart and J2Commerce plugins.
+url: "https://docs.infynipay.com"
+baseurl: ""
+lang: en
+author: InfyniPay
+
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# jekyll-sitemap generates /sitemap.xml. The hand-written one this replaces had
+# to be edited by hand on every change, which is exactly the kind of file that
+# goes stale unnoticed — and a stale sitemap is worse than none, because it
+# teaches crawlers to distrust the ones you do submit.
+
+exclude:
+  # Working documents that live in this repo but must not be served. Before the
+  # build step existed, GitHub Pages published the repository root verbatim, so
+  # every one of these was publicly readable at docs.infynipay.com/<name>.
+  - README.md
+  - CLOUDFLARE-TUNNEL-INSTRUCTIONS.md
+  - caiq-answer-pack.md
+  - caiq-v4.0.3-answers.csv
+  - caiq-v4.0.3-filled.csv
+  - verified-security-claims.md
+  - policies/
+  - tasks/
+  - Gemfile
+  - Gemfile.lock
+  - .gitignore
+
+safe: true
+incremental: false

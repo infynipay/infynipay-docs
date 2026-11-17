@@ -1,0 +1,65 @@
+---
+layout: default
+title: "Errors"
+description: "InfyniPay error codes, what each one means, and the ones worth handling explicitly in your integration."
+permalink: /errors/
+---
+<section class="section" id="errors">
+                <h2 id="errors-2">Errors</h2>
+                <p>The API uses conventional HTTP status codes; failures return a JSON body describing what went wrong.</p>
+
+                <div class="table-scroll">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Meaning</th>
+                            <th>Usual cause</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>200 / 201</td>
+                            <td>OK / Created</td>
+                            <td>The request succeeded.</td>
+                        </tr>
+                        <tr>
+                            <td>400</td>
+                            <td>Bad Request</td>
+                            <td>A required field is missing, or a value is out of range — for example an unsupported <code>currency</code>.</td>
+                        </tr>
+                        <tr>
+                            <td>401</td>
+                            <td>Unauthorized</td>
+                            <td>Missing, malformed or revoked API key.</td>
+                        </tr>
+                        <tr>
+                            <td>403</td>
+                            <td>Forbidden</td>
+                            <td>The key is valid but has no permission on that app — often a sandbox key used against a live app.</td>
+                        </tr>
+                        <tr>
+                            <td>404</td>
+                            <td>Not Found</td>
+                            <td>Unknown <code>appId</code>, <code>paymentId</code>, <code>referenceId</code> or <code>customerId</code>.</td>
+                        </tr>
+                        <tr>
+                            <td>409</td>
+                            <td>Conflict</td>
+                            <td>The operation does not fit the current state — capturing an already-captured payment, or creating a payment with a <code>referenceId</code> your app has already used.</td>
+                        </tr>
+                        <tr>
+                            <td>500</td>
+                            <td>Server Error</td>
+                            <td>Something failed on our side. Retry with backoff; if it persists, contact support with the <code>paymentId</code>.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h3 id="payment-failures-are-not-http-failures">Payment failures are not HTTP failures</h3>
+                <p>A declined card is a successful API call: you get <code>200</code>, and the payment's <code>paymentState</code> is <code>Failed</code> with the reason in <code>lastError</code>. Always branch on the state, not on the status code alone.</p>
+            </section>
+
+            <!-- Support -->
+            

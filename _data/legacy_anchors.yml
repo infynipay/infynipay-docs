@@ -1,0 +1,26 @@
+# Every fragment the documentation used while it lived on one URL, mapped to
+# where that content moved. Consumed by _includes/anchor-shim.html.
+#
+# A fragment is never sent to the server, so no redirect, rewrite or 301 can
+# repair these — the fix has to run in the browser. Old links exist in plugin
+# READMEs, support email and anywhere else people pasted them.
+#
+# Do not delete entries. They cost nothing and the links they serve are the
+# ones nobody can see or measure.
+authentication: /authentication/
+customers: /customers/
+environments: /authentication/#environments
+errors: /errors/
+integrations: /plugins/
+joomla: /plugins/#joomla
+overview: /
+payment-states: /payments/states/
+payments: /payments/
+quickstart: /quickstart/
+rotation: /webhooks/signing/#rotation
+support: /support/
+webhook-samples: /webhooks/verification-samples/
+webhook-signing: /webhooks/signing/
+webhooks: /webhooks/
+whmcs: /plugins/#whmcs
+woocommerce: /plugins/#woocommerce
